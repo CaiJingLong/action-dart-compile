@@ -1,0 +1,35 @@
+name: "action-dart-compile"
+description: "Compile dart binaries and upload them to a release"
+runs:
+  using: "composite"
+  steps:
+    - name: "Check is release"
+      shell: bash
+      run: |
+        if [ -z "${{ github.event.release.tag_name }}" ]; then
+          echo "This is not a release, skipping"
+          exit 78
+        fi
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        sdk: stable
+    - name: compile and upload
+      shell: bash
+      run: |
+        export TAG_NAME=${{ github.event.release.tag_name }}
+        export BUILD_OS=$(uname -s)
+        cd $GITHUB_WORKSPACE
+        dart pub get
+        dart analyze
+        export DART_BINS=$(ls bin/*.dart)
+        for dart_file in $DART_BINS; do
+            echo "Compiling $dart_file"
+            dart compile exe $dart_file
+        done
+        chmod +x bin/*.exe
+        export TARGET_GZ=${BUILD_OS}_$TAG_NAME.tar.gz
+        tar -czvf $TARGET_GZ bin/*.exe
+        gh release upload $TAG_NAME $TARGET_GZ
