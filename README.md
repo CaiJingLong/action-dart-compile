@@ -52,8 +52,6 @@ jobs:
 ```yaml
 name: Add binaries to release
 run-name: Add binaries to release ${{ github.event.release.tag_name }}
-env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 on:
   release:
     types:
@@ -67,7 +65,11 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     name: Upload ${{ matrix.os }} binaries to release ${{ github.event.release.tag_name }}
     steps:
-      - name: Upload
+      - name: Upload binaries to release ${{ github.event.release.tag_name }} on ${{ matrix.os }}
         uses: caijinglong/action-dart-compile@v1
-
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    
 ```
