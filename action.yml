@@ -20,7 +20,7 @@ runs:
       shell: bash
       run: |
         export TAG_NAME=${{ github.event.release.tag_name }}
-        export BUILD_OS=$(uname -s)
+        export BUILD_OS="$(uname -s)-$(uname -m)"
         cd $GITHUB_WORKSPACE
         dart pub get
         dart analyze
